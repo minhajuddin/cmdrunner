@@ -1,0 +1,3 @@
+#cmdrunner
+
+Starts a go command server which accepts commands and runs them

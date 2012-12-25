@@ -1,13 +1,17 @@
 package main
 
 import (
+	"bufio"
 	"log"
-	"os/exec"
 	"net"
+	"os/exec"
+	"strings"
 )
 
+const sockAddr = "/tmp/cmdrunner.sock"
+
 func run(args ...string) {
-	if(len(args) == 0){
+	if len(args) == 0 {
 		log.Println("ERROR: Invalid number of args")
 		return
 	}
@@ -20,16 +24,32 @@ func run(args ...string) {
 	log.Println(string(out))
 }
 
-func main() {
-	log.Println("Started go cmdrunner")
+func handle(c net.Conn) {
+	remoteAddr := c.RemoteAddr()
+	defer log.Println("connection closed for ", remoteAddr)
+	defer c.Close()
+	r := bufio.NewReader(c)
+	for {
+		rawline, err := r.ReadString('\n')
 
-	l, err := net.Listen("unix", "/tmp/cmdrunner.sock")
+		//connection has probably closed
+		if err != nil {
+			log.Println(err)
+		} else {
+			cmd := strings.Trim(rawline, "\n\r")
+			run(cmd)
+		}
+	}
+}
+
+func main() {
+	l, err := net.Listen("unix", sockAddr)
+	defer l.Close()
 
 	if err != nil {
-	  log.Fatal("Failed to open socket", err)
+		log.Fatal("Failed to open socket", err)
 	}
-	
-
+	log.Println("Started go cmdrunner at", sockAddr)
 	for {
 		c, err := l.Accept()
 		if err != nil {
@@ -39,7 +59,5 @@ func main() {
 		log.Println("accepted connection")
 		go handle(c)
 	}
-	//log.Println(os.Args)
-	//run(os.Args[1:]...)
 	log.Println("Finished go cmdrunner")
 }

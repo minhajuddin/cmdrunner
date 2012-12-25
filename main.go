@@ -2,8 +2,8 @@ package main
 
 import (
 	"log"
-	"os"
 	"os/exec"
+	"net"
 )
 
 func run(args ...string) {
@@ -22,7 +22,24 @@ func run(args ...string) {
 
 func main() {
 	log.Println("Started go cmdrunner")
-	log.Println(os.Args)
-	run(os.Args[1:]...)
+
+	l, err := net.Listen("unix", "/tmp/cmdrunner.sock")
+
+	if err != nil {
+	  log.Fatal("Failed to open socket", err)
+	}
+	
+
+	for {
+		c, err := l.Accept()
+		if err != nil {
+			log.Println("error in accept", err)
+			break
+		}
+		log.Println("accepted connection")
+		go handle(c)
+	}
+	//log.Println(os.Args)
+	//run(os.Args[1:]...)
 	log.Println("Finished go cmdrunner")
 }

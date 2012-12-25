@@ -10,16 +10,16 @@ import (
 
 const sockAddr = "/tmp/cmdrunner.sock"
 
-func run(args ...string) {
-	if len(args) == 0 {
-		log.Println("ERROR: Invalid number of args")
+func run(arg string) {
+	if len(arg) == 0 {
+		log.Println("ERROR: Invalid arg")
 		return
 	}
-	log.Printf("running *%v*\n", args)
-	cmd := exec.Command(args[0], args[1:]...)
+	log.Printf("running *%v*\n", arg)
+	cmd := exec.Command("bash", "-c", arg)
 	out, err := cmd.Output()
 	if err != nil {
-		log.Fatal("ERROR: ", err)
+		log.Println("ERROR: ", err)
 	}
 	log.Println(string(out))
 }

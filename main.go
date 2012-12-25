@@ -6,13 +6,16 @@ import (
 	"os/exec"
 )
 
-func run(arg ...string) {
-	//cmd := exec.Command("bash", "-c", arg)
-	log.Printf("running *%v*\n", arg)
-	cmd := exec.Command(arg[0], arg[1:]...)
+func run(args ...string) {
+	if(len(args) == 0){
+		log.Println("ERROR: Invalid number of args")
+		return
+	}
+	log.Printf("running *%v*\n", args)
+	cmd := exec.Command(args[0], args[1:]...)
 	out, err := cmd.Output()
 	if err != nil {
-		log.Fatal("ERR", err)
+		log.Fatal("ERROR: ", err)
 	}
 	log.Println(string(out))
 }
